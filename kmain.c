@@ -1,3 +1,44 @@
-void kmain(void) {
+
+#define FB_START		0x000b8000
+#define FB_BLACK		0
+#define FB_BLUE			1
+#define FB_GREEN		2
+#define FB_CYAN			3
+#define FB_RED			4
+#define FB_MAGENTA		5
+#define FB_BROWN		6
+#define FB_LIGHT_GREY		7
+#define FB_DARK_GREY		8
+#define FB_LIGHT_BLUE		9
+#define FB_LIGHT_GREEN		10
+#define FB_LIGHT_CYAN		11
+#define FB_LIGHT_RED		12
+#define FB_LIGHT_MAGENTA	13
+#define FB_LIGHT_BROWN		14
+#define FB_WHITE		15
+
+char *fb = (char *) FB_START; // for now, global defined frame buffer
+
+/** fb_write_cell:
+ * Writes a character with the given foreground and background to position i in
+ * the framebuffer.
+ * @param i: Location in the framebuffer
+ * @param c: Character
+ * @param fg: Foreground color
+ * @param bg: Background color
+ */
+void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
+{
+	fb[i] = c;
+	fb[i + 1] = ((bg & 0x0f) << 4) | (fg & 0x0f);
+}
+
+void kmain(void)
+{
+	char hello_world[] = "Hello World!";
+	unsigned int i;
+
+	for (i = 0; i < sizeof(hello_world); i++)
+		fb_write_cell(i * 2, hello_world[i], FB_WHITE, FB_BLACK);
 	for(;;);
 }
