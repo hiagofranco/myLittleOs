@@ -26,7 +26,15 @@
 #define FB_LIGHT_BROWN		14
 #define FB_WHITE		15
 
-char *fb = (char *) FB_START;
+struct frame_buffer {
+	char *buf;		/* buffer contents to write */
+	unsigned short c_pos;	/* current cursor position */
+};
+
+struct frame_buffer fb = {
+	.buf = (char *) FB_START,
+	.c_pos = 0,
+};
 
 /** fb_move_cursor:
  * Moves the cursor of the framebuffer to the give position
@@ -45,15 +53,16 @@ void fb_move_cursor(unsigned short pos)
  * Writes a character with the given foreground and background to position i in
  * the framebuffer.
  *
- * @param i: Location in the framebuffer
  * @param c: Character
  * @param fg: Foreground color
  * @param bg: Background color
  */
-void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
+void fb_write_cell(char c, unsigned char fg, unsigned char bg)
 {
-	fb[i] = c;
-	fb[i + 1] = ((bg & 0x0f) << 4) | (fg & 0x0f);
+	fb.buf[fb.c_pos * 2] = c;
+	fb.buf[fb.c_pos * 2 + 1] = ((bg & 0x0f) << 4) | (fg & 0x0f);
+	fb_move_cursor(fb.c_pos);
+	fb.c_pos += 1;
 }
 
 /** fb_write:
@@ -70,9 +79,7 @@ int fb_write(char *buf, unsigned int len)
 	unsigned int i;
 
 	for (i = 0; i < len; i++)
-		fb_write_cell(i * 2, buf[i], FB_WHITE, FB_BLACK);
-
-	fb_move_cursor(len - 1); // -1 to ignore the last byte '/0'
+		fb_write_cell(buf[i], FB_GREEN, FB_RED);
 
 	return 0;
 }
