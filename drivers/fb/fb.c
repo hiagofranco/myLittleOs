@@ -80,6 +80,22 @@ void fb_move_cursor(unsigned short pos)
 	outb(FB_DATA_PORT, pos & 0x00ff);
 }
 
+/** fb_clear_screen
+ * Clear the screen and move back cursor to inital position
+ */
+void fb_clear_screen(void)
+{
+	int i, j, pos;
+	for (i = 0; i < FB_ROWS - 1; i++) {
+		for (j = 0; j < FB_COLUMNS; j++) {
+			pos = (i * FB_COLUMNS + j) * 2;
+			fb.buf[pos] = ' '; // char
+			fb.buf[pos + 1] = ((FB_BLACK & 0x0f) << 4) | (FB_WHITE & 0x0f); // color
+		}
+	}
+	fb_move_cursor(0);
+}
+
 /** fb_write_cell:
  * Writes a character with the given foreground and background to position i in
  * the framebuffer.
